@@ -1,4 +1,3 @@
-from json import dumps
 from time import process_time
 from random import sample
 from typing import Optional, Generator
@@ -32,11 +31,8 @@ def loop_through_strategies(size: int) -> Generator[tuple[str, float | int], Non
 
 
 if __name__ == '__main__':
-    results: dict[int, dict[str, float | int]] = {}
     for i in range(2, 6):
-        iteration_results: list[tuple[str, float | int]] = [*loop_through_strategies(10 ** i)]
-        for name, time in iteration_results:
-            if not i in results:
-                results[i] = {}
-            results[i][name] = time
-    print(dumps(results, indent=4))
+        print(f"List size has {i} zeroes: {10 ** i}")
+        for name, time in loop_through_strategies(10 ** i):
+            print(f"> {name}: {time}")
+        print()
