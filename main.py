@@ -1,5 +1,7 @@
+from json import dumps
+from time import process_time
 from random import sample
-from typing import Optional
+from typing import Optional, Generator
 from algs import *
 
 
@@ -11,30 +13,30 @@ class Context:
     def set_alg(self, alg: Sort):
         self.__alg = alg
 
-    def probe(self) -> None:
+    def get_sort_speed(self, size: int) -> float | int:
         if self.__alg is None:
             raise ValueError("ERROR: sorting algorythm isn't set!")
-        print(f"TESTING {type(self.__alg).__name__}:")
-        rand_arr: list[int] = sample(range(100), 9)
-        print(f"> before: {rand_arr}")
+        rand_arr: list[int] = sample(range(size), size)
+        start: float | int = process_time()
         self.__alg.sort(rand_arr)
-        print(f"> sorted: {rand_arr}\n")
+        end: float | int = process_time()
+        return end - start
+
+
+ctx: Context = Context()
+
+def loop_through_strategies(size: int) -> Generator[tuple[str, float | int], None, None]:
+    for alg_name in algs:
+        ctx.set_alg(algs[alg_name])
+        yield alg_name, ctx.get_sort_speed(size)
 
 
 if __name__ == '__main__':
-    ctx: Context = Context()
-
-    ctx.set_alg(BubbleSort())
-    ctx.probe()
-
-    ctx.set_alg(SelectionSort())
-    ctx.probe()
-
-    ctx.set_alg(InsertionSort())
-    ctx.probe()
-
-    ctx.set_alg(MergeSort())
-    ctx.probe()
-
-    ctx.set_alg(QuickSort())
-    ctx.probe()
+    results: dict[int, dict[str, float | int]] = {}
+    for i in range(2, 6):
+        iteration_results: list[tuple[str, float | int]] = [*loop_through_strategies(10 ** i)]
+        for name, time in iteration_results:
+            if not i in results:
+                results[i] = {}
+            results[i][name] = time
+    print(dumps(results, indent=4))
